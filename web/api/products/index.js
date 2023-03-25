@@ -1,8 +1,7 @@
-import knex from "../../db/connect.js"
 export default async function Products(req, res) {
-    const currentShop = res.locals.shopify.session.shop
+    const {UQuery} = res.locals
 
-    knex("products").where({ store: currentShop }).then(data => {
+    UQuery.getAllProducts().then(data => {
         res.status(200).send({ data })
     })
 }
