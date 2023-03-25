@@ -1,5 +1,6 @@
 import chalk from "chalk"
 import knex from "./connect.js"
+import shopify from "../shopify.js"
 
 export default async function saveGraphQlProductsToDB(data, store) {
     console.log(chalk.green("OP:"), chalk.blue("Saving products to db"))
