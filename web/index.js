@@ -10,6 +10,7 @@ import GDPRWebhookHandlers from "./gdpr.js";
 import ProductsWebhookHandlers from './webhooks/products.js'
 import fetchProducts from "./api/products/fetch.js";
 import getAllProducts from "./api/products/index.js";
+import Query from "./db/Query.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -42,6 +43,13 @@ app.post (
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
 app.use(express.json());
+app.use((req, res, next) => {
+  if( res.locals.shopify?.session.shop) {
+    res.locals.UQuery = new Query(res.locals.shopify.session.shop)
+  }
+  
+  next()
+})
 
 app.get("/api/products/", getAllProducts)
 app.get("/api/products/fetch", fetchProducts)

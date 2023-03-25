@@ -1,10 +1,11 @@
 
 import { GraphqlQueryError } from "@shopify/shopify-api";
 import shopify from "../shopify.js";
-import saveGraphQlProductsToDB from "../db/saveProductsToDatabase.js"
+import Query from "../db/Query.js";
 
 export default async function startFetchProductsJob(res, settings) {
     const currentShop = res.locals.shopify.session.shop
+    const query = new Query(currentShop)
     console.log(res.locals.shopify.session)
     try {
         let totalProducts = []
@@ -14,7 +15,7 @@ export default async function startFetchProductsJob(res, settings) {
             data = await fetchShopProducts(res.locals.shopify.session, data.products.pageInfo.endCursor)
             totalProducts.push(...data.products.edges)
         }
-        await saveGraphQlProductsToDB(totalProducts, currentShop)
+        await query.insertGraphQlProducts(totalProducts)
         await settings.enableRefetchingProducts()
     }
     catch (e) {
