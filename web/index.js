@@ -45,7 +45,6 @@ app.use("/api/*", shopify.validateAuthenticatedSession());
 app.use(express.json());
 app.use((req, res, next) => {
   if( res.locals.shopify?.session.shop) {
-    console.log("hellop from middleware")
     res.locals.UQuery = new Query(res.locals.shopify.session.shop)
   }
   

@@ -25,15 +25,15 @@ export default class Query {
     }
 
     async insertProduct({ id, handle, title, tags, onlineStoreUrl, featuredImage }) {
-        await knex(this.table.PRODUCTS).where({ store, shopify_id: id }).first().then(async data => {
+        await this.getProductByShopifyId(id).then(async data => {
             if (data == undefined) {
-                console.log("inserting products")
+                console.log("inserting product")
                 await knex("products").insert({
                     id: null,
                     shopify_id: id,
                     handle,
                     title,
-                    store,
+                    store: this.store,
                     onlineStoreUrl,
                     tags: tags.join(","),
                     image: null
@@ -52,4 +52,14 @@ export default class Query {
         })
     }
 
+
+    // query methods
+    getAllProducts() {
+        // TODO: Implement pagination
+        const {table, store} = this
+        return knex(table.PRODUCTS).where({store: this.store})
+    }
+    getProductByShopifyId(shopify_id) {
+        return knex(this.table.PRODUCTS).where({ store: this.store, shopify_id}).first()
+    }
 }
