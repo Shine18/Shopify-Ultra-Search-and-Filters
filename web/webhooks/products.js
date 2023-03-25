@@ -1,18 +1,18 @@
-import { DeliveryMethod, Session } from '@shopify/shopify-api'
-import { saveProductToDb } from '../db/saveProductsToDatabase.js'
+import { DeliveryMethod } from '@shopify/shopify-api'
+import Query from '../db/Query.js'
 import shopify from '../shopify.js'
 
 async function updateProduct(topic, shop, body, webhookId) {
     console.log("Webhook triggered")
     console.log(topic, shop, body, webhookId)
+    const query = new Query(shop)
     const offlineSessionId = await shopify.api.session.getOfflineId(shop)
     const session = await shopify.config.sessionStorage.loadSession(offlineSessionId)
-    console.log("session", session)
 
     const product = JSON.parse(body)
     const graphQlProduct = await fetchGraphQlProduct(product.handle, session)
     const {id, handle,title, tags, onlineStoreUrl, featuredImage} = graphQlProduct.productByHandle
-    await saveProductToDb({id, handle,title, tags, onlineStoreUrl, featuredImage}, shop)
+    await query.insertProduct({id, handle,title, tags, onlineStoreUrl, featuredImage})
     
 }
 
