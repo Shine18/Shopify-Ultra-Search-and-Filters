@@ -5,6 +5,7 @@ import saveGraphQlProductsToDB from "../db/saveProductsToDatabase.js"
 
 export default async function startFetchProductsJob(res, settings) {
     const currentShop = res.locals.shopify.session.shop
+    console.log(res.locals.shopify.session)
     try {
         let totalProducts = []
         let data = await fetchShopProducts(res.locals.shopify.session)

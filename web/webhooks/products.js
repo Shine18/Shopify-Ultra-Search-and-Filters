@@ -1,19 +1,22 @@
-import { DeliveryMethod } from '@shopify/shopify-api'
+import { DeliveryMethod, Session } from '@shopify/shopify-api'
+import { saveProductToDb } from '../db/saveProductsToDatabase.js'
+import shopify from '../shopify.js'
 
 async function updateProduct(topic, shop, body, webhookId) {
     console.log("Webhook triggered")
     console.log(topic, shop, body, webhookId)
+    const offlineSessionId = await shopify.api.session.getOfflineId(shop)
+    const session = await shopify.config.sessionStorage.loadSession(offlineSessionId)
+    console.log("session", session)
 
     const product = JSON.parse(body)
-    const {  handle } = product
-
-    const graphQlProduct = await fetchGraphQlProduct(handle)
-    console.log(graphQlProduct)
-    // TODO: Currently failing, need to create shopify session here in order to do graphql query
-    // TODO:save products in db
+    const graphQlProduct = await fetchGraphQlProduct(product.handle, session)
+    const {id, handle,title, tags, onlineStoreUrl, featuredImage} = graphQlProduct.productByHandle
+    await saveProductToDb({id, handle,title, tags, onlineStoreUrl, featuredImage}, shop)
+    
 }
 
-async function fetchGraphQlProduct(handle) {
+async function fetchGraphQlProduct(handle, session) {
     const client = new shopify.api.clients.Graphql({ session });
 
     try {
