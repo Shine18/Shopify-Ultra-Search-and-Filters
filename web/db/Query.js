@@ -2,7 +2,8 @@ import knex from "./connect.js"
 
 export default class Query {
     table = {
-        PRODUCTS: "products"
+        PRODUCTS: "products",
+        PRODUCT_FIELDS: "product_fields"
     }
     constructor(store) {
         this.store = store
@@ -27,7 +28,6 @@ export default class Query {
     async insertProduct({ id, handle, title, tags, onlineStoreUrl, featuredImage }) {
         await this.getProductByShopifyId(id).then(async data => {
             if (data == undefined) {
-                console.log("inserting product")
                 await knex("products").insert({
                     id: null,
                     shopify_id: id,
@@ -40,7 +40,6 @@ export default class Query {
                 })
                     .catch(this.catchError)
             } else {
-                console.log("updating product")
                 await knex("products").where({ id: data.id }).update({
                     handle,
                     title,
@@ -52,6 +51,24 @@ export default class Query {
         })
     }
 
+    async insertProductField({title,type,tag, appearAs}) {
+        const byTitleExists = await this.getProductFieldByTitle(title)
+        const byTagExists = await this.getProductFieldByTag(tag)
+
+        if( !byTagExists && !byTitleExists) {
+            await knex(this.table.PRODUCT_FIELDS).insert({
+                title,
+                type,
+                tag,
+                store: this.store,
+                appear_as: appearAs
+            })
+            return true
+        }
+        return false
+    }
+
+
 
     // query methods
     getAllProducts() {
@@ -61,5 +78,11 @@ export default class Query {
     }
     getProductByShopifyId(shopify_id) {
         return knex(this.table.PRODUCTS).where({ store: this.store, shopify_id}).first()
+    }
+    getProductFieldByTag(tag) {
+        return knex(this.table.PRODUCT_FIELDS).where({tag}).first()
+    }
+    getProductFieldByTitle(title) {
+        return knex(this.table.PRODUCT_FIELDS).where({title}).first()
     }
 }

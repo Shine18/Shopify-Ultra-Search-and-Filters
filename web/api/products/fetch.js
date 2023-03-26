@@ -1,7 +1,7 @@
 import startFetchProductsJob from "../../jobs/fetchProductsJob.js";
 import Settings from "../../db/settings.js";
 
-export default async function fetchProducts(req, res) {
+export default async function ProductsFetch(req, res) {
     const currentShop = res.locals.shopify.session.shop
     const settings = new Settings(currentShop)
     await settings.fetchData()

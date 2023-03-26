@@ -1,3 +1,4 @@
+import { useToast } from '@shopify/app-bridge-react';
 import {
     EmptySearchResult,
     IndexTable,
@@ -17,6 +18,7 @@ import {
 } from '@shopify/polaris';
 import { useEffect, useState } from 'react';
 import MainLayout from "../../components/Layout/MainLayout";
+import { useAuthenticatedFetch } from '../../hooks';
 
 const ProductFieldsTypes = [
     {
@@ -143,16 +145,45 @@ export default function Index() {
 
 
 function ProductFieldForm() {
+    const fetch = useAuthenticatedFetch()
+    const { show } = useToast()
+
     const [title, setTitle] = useState("")
     const [type, setType] = useState("text")
     const [tag, setTag] = useState("")
     const [appearAs, setAppearAs] = useState(AppearAsOptions[0].value)
 
     return <Form onSubmit={() => {
-        setTitle("")
-        setType("text")
-        setTag("")
-        setAppearAs("combobox")
+        if (tag == "") {
+            show("Please fill tag for new data field", { isError: true })
+            return
+        }
+        if (title == "") {
+            show("Please fill title for new data field", { isError: true })
+            return
+        }
+        fetch("/api/product_fields/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: JSON.stringify({
+                title, type, tag, appearAs
+            })
+        }).then(res => res.json()).then(data => {
+            if( data.error ) {
+                show(data.message, { isError: true})
+                return
+            }
+            console.log(data)
+            show(data.message)
+
+            setTitle("")
+            setType("text")
+            setTag("")
+            setAppearAs("combobox")
+        })
     }}>
         <FormLayout>
             <Text variant="headingMd">Create Data Field</Text>
@@ -164,7 +195,7 @@ function ProductFieldForm() {
                     options={ProductFieldsTypes}
                     onChange={e => setType(e)}
                 />
-                <TextField label="Tag" value={tag} onChange={(e) => { setTag(e) }} autoComplete="off" />
+                <TextField prefix="us_" label="Tag" value={tag} onChange={(e) => { setTag(e.replace(" ", "_").trim()) }} autoComplete="off" />
                 <Select
                     value={appearAs}
                     disabled={type == "color" || type == "range"}
