@@ -1,5 +1,5 @@
 import { Frame, Navigation } from '@shopify/polaris';
-import { HomeMinor, DynamicSourceMajor, ProductsMinor } from '@shopify/polaris-icons';
+import { HomeMinor, DynamicSourceMajor, ListMajor, ProductsMinor } from '@shopify/polaris-icons';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -28,6 +28,13 @@ export default function MainLayout({ children }) {
                     icon: ProductsMinor,
                     selected: location.pathname == "/products/",
                     onClick: () => { navigate("/products/") }
+                },
+                {
+                    url: "/product_fields/",
+                    label: "Filter & Search Fields",
+                    icon: ListMajor,
+                    selected: location.pathname == "/product_fields/",
+                    onClick: () => { navigate("/product_fields/") }
                 },
                 {
                     url: '/data/',
