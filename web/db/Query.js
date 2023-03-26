@@ -5,6 +5,8 @@ export default class Query {
         PRODUCTS: "products",
         PRODUCT_FIELDS: "product_fields"
     }
+    TAG_PREFIX = "us_"
+    
     constructor(store) {
         this.store = store
     }
@@ -59,7 +61,7 @@ export default class Query {
             await knex(this.table.PRODUCT_FIELDS).insert({
                 title,
                 type,
-                tag,
+                tag: `${TAG_PREFIX}${tag}`,
                 store: this.store,
                 appear_as: appearAs
             })
@@ -79,10 +81,14 @@ export default class Query {
     getProductByShopifyId(shopify_id) {
         return knex(this.table.PRODUCTS).where({ store: this.store, shopify_id}).first()
     }
+
+    getAllProductFields() {
+        return knex(this.table.PRODUCT_FIELDS).where({store: this.store})
+    }
     getProductFieldByTag(tag) {
-        return knex(this.table.PRODUCT_FIELDS).where({tag}).first()
+        return knex(this.table.PRODUCT_FIELDS).where({tag, store: this.store}).first()
     }
     getProductFieldByTitle(title) {
-        return knex(this.table.PRODUCT_FIELDS).where({title}).first()
+        return knex(this.table.PRODUCT_FIELDS).where({title, store: this.store}).first()
     }
 }

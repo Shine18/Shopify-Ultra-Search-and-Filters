@@ -18,7 +18,7 @@ import {
 } from '@shopify/polaris';
 import { useEffect, useState } from 'react';
 import MainLayout from "../../components/Layout/MainLayout";
-import { useAuthenticatedFetch } from '../../hooks';
+import { useAppQuery, useAuthenticatedFetch } from '../../hooks';
 
 const ProductFieldsTypes = [
     {
@@ -68,9 +68,26 @@ const testData = Array(130).fill(0).map((_, i) => {
 
 export default function Index() {
     const [currentPage, setCurrentPage] = useState(1)
+    const fetch = useAuthenticatedFetch()
 
-    const totalPages = parseInt(Math.ceil(testData.length / 50))
-    const itemsToLoad = testData.slice((currentPage * 50) - 50, currentPage * 50)
+    const {
+        data: productFields,
+        refetch: refetchProductFields,
+        isLoading: isLoadingProductFields,
+        isRefetching: isRefetchingProductFields
+    } = useAppQuery({
+        url: "/api/product_fields/",
+        reactQueryOptions: {
+            onSuccess: () => {
+                console.log("Qury done")
+            }
+        }
+    })
+
+    console.log("product fields", productFields)
+
+
+
     const resourceName = {
         singular: 'data field',
         plural: 'data fields',
@@ -82,29 +99,38 @@ export default function Index() {
         { title: "Tag" }
     ]
 
+    const data = productFields || []
+
+    const pageItemsCount = 50
+    const totalPages = parseInt(Math.ceil(data.length / pageItemsCount))
+    const itemsToLoad = data.slice((currentPage * pageItemsCount) - pageItemsCount, currentPage * pageItemsCount)
+    const startItemCount = ((currentPage * pageItemsCount) - pageItemsCount) + 1
+    const endItemCount = data.length < (currentPage * pageItemsCount) ? data.length : currentPage * pageItemsCount
+    const paginationMarkup = <Pagination label={`${startItemCount}-${endItemCount} of ${data.length} Results`}
+        hasNext={currentPage < totalPages}
+        hasPrevious={currentPage > 1}
+        onPrevious={() => {
+            setCurrentPage(currentPage - 1)
+        }}
+        onNext={() => {
+            setCurrentPage(currentPage + 1)
+        }}>
+
+    </Pagination>
+
     return <MainLayout>
         <Page>
             <AlphaStack gap="5">
                 <AlphaCard>
                     <ProductFieldForm />
                 </AlphaCard>
-                <Pagination label="Results"
-                    hasNext={currentPage < totalPages}
-                    hasPrevious={currentPage > 1}
-                    onPrevious={() => {
-                        setCurrentPage(currentPage - 1)
-                    }}
-                    onNext={() => {
-                        setCurrentPage(currentPage + 1)
-                    }}>
-
-                </Pagination>
+                {paginationMarkup}
                 <AlphaCard padding={0}>
                     <IndexTable
-                        loading={false}
+                        loading={isLoadingProductFields}
                         emptyState={emptyStateMarkup}
                         resourceName={resourceName}
-                        itemCount={testData.length}
+                        itemCount={data.length}
                         headings={tableHeader}
                         selectable={false}
                     >
@@ -127,17 +153,7 @@ export default function Index() {
                         ))}
                     </IndexTable>
                 </AlphaCard>
-                <Pagination label="Results"
-                    hasNext={currentPage < totalPages}
-                    hasPrevious={currentPage > 1}
-                    onPrevious={() => {
-                        setCurrentPage(currentPage - 1)
-                    }}
-                    onNext={() => {
-                        setCurrentPage(currentPage + 1)
-                    }}>
-
-                </Pagination>
+                {paginationMarkup}
             </AlphaStack>
         </Page>
     </MainLayout>
@@ -172,8 +188,8 @@ function ProductFieldForm() {
                 title, type, tag, appearAs
             })
         }).then(res => res.json()).then(data => {
-            if( data.error ) {
-                show(data.message, { isError: true})
+            if (data.error) {
+                show(data.message, { isError: true })
                 return
             }
             console.log(data)

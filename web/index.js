@@ -12,6 +12,7 @@ import fetchProducts from "./api/products/fetch.js";
 import getAllProducts from "./api/products/index.js";
 import Query from "./db/Query.js";
 import ProductFieldsCreate from "./api/product_fields/create.js";
+import ProductFieldsIndex from "./api/product_fields/index.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
 app.get("/api/products/", getAllProducts)
 app.get("/api/products/fetch", fetchProducts)
 
+app.get("/api/product_fields/", ProductFieldsIndex)
 app.post("/api/product_fields/create", ProductFieldsCreate)
 
 
