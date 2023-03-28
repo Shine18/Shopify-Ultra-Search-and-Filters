@@ -61,7 +61,7 @@ export default class Query {
             await knex(this.table.PRODUCT_FIELDS).insert({
                 title,
                 type,
-                tag: `${TAG_PREFIX}${tag}`,
+                tag: `${this.TAG_PREFIX}${tag}`,
                 store: this.store,
                 appear_as: appearAs
             })
@@ -74,21 +74,31 @@ export default class Query {
 
     // query methods
     getAllProducts() {
-        // TODO: Implement pagination
         const {table, store} = this
-        return knex(table.PRODUCTS).where({store: this.store})
+        return knex(table.PRODUCTS).where({store}).orderBy("id","desc")
     }
     getProductByShopifyId(shopify_id) {
         return knex(this.table.PRODUCTS).where({ store: this.store, shopify_id}).first()
     }
 
     getAllProductFields() {
-        return knex(this.table.PRODUCT_FIELDS).where({store: this.store})
+        return knex(this.table.PRODUCT_FIELDS).where({store: this.store}).orderBy('id', 'desc')
+    }
+    getProductField(id) {
+        return knex(this.table.PRODUCT_FIELDS).where({ id, store: this.store}).first()
     }
     getProductFieldByTag(tag) {
         return knex(this.table.PRODUCT_FIELDS).where({tag, store: this.store}).first()
     }
     getProductFieldByTitle(title) {
         return knex(this.table.PRODUCT_FIELDS).where({title, store: this.store}).first()
+    }
+
+
+    // update product fields
+    updateProductField(id, {title,appearAs}){
+        return knex(this.table.PRODUCT_FIELDS).where({ id, store: this.store}).update({
+            title,appear_as: appearAs
+        })
     }
 }
