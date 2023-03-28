@@ -1,4 +1,4 @@
-import { useToast } from '@shopify/app-bridge-react';
+import {  useToast } from '@shopify/app-bridge-react';
 import {
     EmptySearchResult,
     IndexTable,
@@ -15,12 +15,14 @@ import {
     Columns,
     Icon,
     Pagination,
+    Link,
 } from '@shopify/polaris';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from "../../components/Layout/MainLayout";
 import { useAppQuery, useAuthenticatedFetch } from '../../hooks';
 
-const ProductFieldsTypes = [
+export const ProductFieldsTypes = [
     {
         label: "Text/Number",
         value: "text"
@@ -35,7 +37,7 @@ const ProductFieldsTypes = [
     }
 ]
 
-const AppearAsOptions = [
+export const AppearAsOptions = [
     {
         label: "Check Boxes",
         value: "checkbox"
@@ -68,7 +70,7 @@ const testData = Array(130).fill(0).map((_, i) => {
 
 export default function Index() {
     const [currentPage, setCurrentPage] = useState(1)
-    const fetch = useAuthenticatedFetch()
+    const navigate = useNavigate()
 
     const {
         data: productFields,
@@ -122,7 +124,7 @@ export default function Index() {
         <Page>
             <AlphaStack gap="5">
                 <AlphaCard>
-                    <ProductFieldForm />
+                    <ProductFieldForm refetch={refetchProductFields} />
                 </AlphaCard>
                 {paginationMarkup}
                 <AlphaCard padding={0}>
@@ -136,11 +138,13 @@ export default function Index() {
                     >
                         {itemsToLoad.map(item => (<IndexTable.Row
                             id={item.id}
-                            key={item.key}
+                            key={item.id}
                         >
                             <IndexTable.Cell>
                                 <Text fontWeight="bold" as="span">
+                                    <Link dataPrimaryLink url={`/product_fields/${item.id}`} onClick={() => { navigate(`/product_fields/${item.id}`)}}>
                                     {item.title}
+                                    </Link>
                                 </Text>
                             </IndexTable.Cell>
                             <IndexTable.Cell>
@@ -160,7 +164,7 @@ export default function Index() {
 }
 
 
-function ProductFieldForm() {
+function ProductFieldForm({ refetch }) {
     const fetch = useAuthenticatedFetch()
     const { show } = useToast()
 
@@ -194,7 +198,7 @@ function ProductFieldForm() {
             }
             console.log(data)
             show(data.message)
-
+            refetch()
             setTitle("")
             setType("text")
             setTag("")
