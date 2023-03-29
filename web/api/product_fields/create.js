@@ -1,5 +1,4 @@
 export default async function ProductFieldsCreate(req, res) {
-    console.log("Creating product fields")
     const { UQuery } = res.locals
     const { title, tag, type, appearAs } = req.body
 

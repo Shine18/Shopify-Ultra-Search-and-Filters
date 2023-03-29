@@ -1,6 +1,6 @@
 import { AlphaCard, Form, FormLayout, Text, TextField, Select, Button, AlphaStack, Layout, Loading, Page, SkeletonBodyText, SkeletonDisplayText, SkeletonPage, Banner } from "@shopify/polaris";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import MainLayout from "../../components/Layout/MainLayout";
 import { useAppQuery, useAuthenticatedFetch } from "../../hooks";
 
@@ -32,6 +32,7 @@ const loadingMarkup = <>
 export default function ProductField() {
     const { id } = useParams()
     const fetch = useAuthenticatedFetch()
+    const navigate = useNavigate()
     const { show } = useToast()
 
     const [loading, setLoading] = useState(true)
@@ -44,11 +45,21 @@ export default function ProductField() {
         fetch(`/api/product_fields/${id}`).then(res => res.json()).then(data => {
             setTitle(data.title)
             setAppearAs(data.appear_as)
-            // console.log(data.appearAs)
             setProductField(data)
             setLoading(false)
         })
     }, [id])
+    const deleteProductField = useCallback(() => {
+        fetch(`/api/product_fields/delete/${id}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then(res => res.json()).then( data => {
+            show(data.message)
+            navigate("/product_fields/")
+        } )
+    }, [id, fetch, navigate])
     let isSaveEnabled = !loading && ((productField.title != title) || (productField.appearAs != appearAs))
 
     const deleteBannerMarkup = <Banner
@@ -59,7 +70,7 @@ export default function ProductField() {
         <AlphaStack gap="2">
             <p>Are you sure you want to delete this data field?</p>
             <div>
-                <Button destructive>Delete</Button>
+                <Button destructive onClick={deleteProductField}>Delete</Button>
             </div>
         </AlphaStack>
     </Banner>

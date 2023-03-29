@@ -1,4 +1,4 @@
-import { Frame, Navigation } from '@shopify/polaris';
+import { Frame, Navigation, TopBar } from '@shopify/polaris';
 import { HomeMinor, DynamicSourceMajor, ListMajor, ProductsMinor } from '@shopify/polaris-icons';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 export default function MainLayout({ children }) {
     const location = useLocation()
     const [currentLocation, setCurrentLocation] = useState(location.pathname)
+    const [isMobileNavOpen, showMobileNav] = useState(false)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -47,7 +48,25 @@ export default function MainLayout({ children }) {
         />
     </Navigation>
 
-    return <Frame navigation={navigationMarkup}>
+
+    const topBarMarkup = <TopBar
+        showNavigationToggle
+        onNavigationToggle={() => { showMobileNav(!isMobileNavOpen) }}
+    />
+    const logo = {
+        width: 124,
+        topBarSource:
+            'https://cdn.shopify.com/s/files/1/0446/6937/files/jaded-pixel-logo-color.svg?6215648040070010999',
+        url: '#',
+        accessibilityLabel: 'Jaded Pixel',
+    };
+
+    return <Frame
+        logo={logo}
+        showMobileNavigation={isMobileNavOpen}
+        onNavigationDismiss={() => { showMobileNav(false) }}
+        topBar={topBarMarkup}
+        navigation={navigationMarkup}>
         {children}
     </Frame>
 }

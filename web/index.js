@@ -15,6 +15,7 @@ import ProductFieldsCreate from "./api/product_fields/create.js";
 import ProductFieldsIndex from "./api/product_fields/index.js";
 import ProductFieldsGet from "./api/product_fields/get.js";
 import ProductFieldsUpdate from "./api/product_fields/update.js";
+import ProductFieldsDelete from "./api/product_fields/delete.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -64,6 +65,7 @@ app.get("/api/product_fields/", ProductFieldsIndex)
 app.post("/api/product_fields/create", ProductFieldsCreate)
 app.get("/api/product_fields/:id", ProductFieldsGet)
 app.post("/api/product_fields/:id", ProductFieldsUpdate)
+app.post("/api/product_fields/delete/:id", ProductFieldsDelete)
 
 
 app.get("/api/products/count", async (_req, res) => {
