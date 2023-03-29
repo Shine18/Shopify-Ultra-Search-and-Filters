@@ -101,4 +101,10 @@ export default class Query {
             title,appear_as: appearAs
         })
     }
+
+
+    // delete 
+    deleteProductField(id) {
+        return knex(this.table.PRODUCT_FIELDS).where({id}).del()
+    }
 }
