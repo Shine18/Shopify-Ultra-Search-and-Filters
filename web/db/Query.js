@@ -6,7 +6,7 @@ export default class Query {
         PRODUCT_FIELDS: "product_fields"
     }
     TAG_PREFIX = "us_"
-    
+
     constructor(store) {
         this.store = store
     }
@@ -53,11 +53,11 @@ export default class Query {
         })
     }
 
-    async insertProductField({title,type,tag, appearAs}) {
+    async insertProductField({ title, type, tag, appearAs }) {
         const byTitleExists = await this.getProductFieldByTitle(title)
         const byTagExists = await this.getProductFieldByTag(tag)
 
-        if( !byTagExists && !byTitleExists) {
+        if (!byTagExists && !byTitleExists) {
             await knex(this.table.PRODUCT_FIELDS).insert({
                 title,
                 type,
@@ -74,37 +74,52 @@ export default class Query {
 
     // query methods
     getAllProducts() {
-        const {table, store} = this
-        return knex(table.PRODUCTS).where({store}).orderBy("id","desc")
+        const { table, store } = this
+        return knex(table.PRODUCTS).where({ store }).orderBy("id", "desc")
     }
     getProductByShopifyId(shopify_id) {
-        return knex(this.table.PRODUCTS).where({ store: this.store, shopify_id}).first()
+        return knex(this.table.PRODUCTS).where({ store: this.store, shopify_id }).first()
     }
 
     getAllProductFields() {
-        return knex(this.table.PRODUCT_FIELDS).where({store: this.store}).orderBy('id', 'desc')
+        return knex(this.table.PRODUCT_FIELDS).where({ store: this.store }).orderBy('id', 'desc')
     }
     getProductField(id) {
-        return knex(this.table.PRODUCT_FIELDS).where({ id, store: this.store}).first()
+        return knex(this.table.PRODUCT_FIELDS).where({ id, store: this.store }).first()
     }
     getProductFieldByTag(tag) {
-        return knex(this.table.PRODUCT_FIELDS).where({tag, store: this.store}).first()
+        return knex(this.table.PRODUCT_FIELDS).where({ tag, store: this.store }).first()
     }
     getProductFieldByTitle(title) {
-        return knex(this.table.PRODUCT_FIELDS).where({title, store: this.store}).first()
+        return knex(this.table.PRODUCT_FIELDS).where({ title, store: this.store }).first()
     }
 
 
     // update product fields
-    updateProductField(id, {title,appearAs}){
-        return knex(this.table.PRODUCT_FIELDS).where({ id, store: this.store}).update({
-            title,appear_as: appearAs
+    updateProductField(id, { title, appearAs }) {
+        return knex(this.table.PRODUCT_FIELDS).where({ id, store: this.store }).update({
+            title, appear_as: appearAs
         })
+    }
+    toggleProductFieldVisibility(id, channel, value) {
+        if(!["in_search", "in_filters", "in_api"].includes(channel)) {
+            return
+        }
+        // let qValue = 0
+        // if( value == true) {
+        //     qValue = 1
+        // }
+        // console.log("qValue", qValue) 
+        return knex(this.table.PRODUCT_FIELDS)
+            .where({ id, store: this.store })
+            .update({
+                [channel]: value
+            })
     }
 
 
     // delete 
     deleteProductField(id) {
-        return knex(this.table.PRODUCT_FIELDS).where({id}).del()
+        return knex(this.table.PRODUCT_FIELDS).where({ id }).del()
     }
 }
