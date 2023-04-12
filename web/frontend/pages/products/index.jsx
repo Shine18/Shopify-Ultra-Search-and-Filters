@@ -1,5 +1,6 @@
 import { useAppQuery, useAuthenticatedFetch } from "../../hooks";
-import { SettingToggle, Page, Text, SkeletonDisplayText, SkeletonBodyText, SkeletonThumbnail, Layout, Columns, AlphaStack, Inline, AlphaCard, Checkbox } from '@shopify/polaris';
+import { SettingToggle, MediaCard, Page, Text, SkeletonDisplayText, SkeletonBodyText, SkeletonThumbnail, Layout, Columns, AlphaStack, Inline, AlphaCard, Checkbox, Button, Divider } from '@shopify/polaris';
+import {ViewMinor} from '@shopify/polaris-icons'
 import MainLayout from '../../components/Layout/MainLayout';
 import { useToast } from "@shopify/app-bridge-react";
 import { useEffect, useState } from "react";
@@ -71,14 +72,37 @@ function SkeletonProductCard() {
 }
 
 function ProductCard({ title, image }) {
+    return <MediaCard portrait
+        title={title}
+        primaryAction={{
+            icon: ViewMinor,
+            content: 'View Data',
+            onAction: () => { },
+        }}
+    >
+        <div style={{ height: 150, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {image ?
+                <img
+                    alt=""
+                    width="100%"
+                    height="100%"
+                    style={{
+                        objectFit: 'contain',
+                        objectPosition: 'center',
+                    }}
+                    src={image}
+                />
+                :
+                <SkeletonThumbnail size="large" />
+            }
+        </div>
+    </MediaCard>
     return <AlphaCard>
-        <SkeletonThumbnail size="large" />
+
+        <Text as="h4" variant="headingMd">{title}</Text>
         <br />
-        <Text as="h4">{title}</Text>
-        <Checkbox
-            label="Show in search"
-            checked={true}
-            onChange={() => { }}
-        />
+        <Divider />
+        <br />
+        <Button onClick={() => { }}>View Data</Button>
     </AlphaCard>
 }

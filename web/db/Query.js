@@ -38,7 +38,7 @@ export default class Query {
                     store: this.store,
                     onlineStoreUrl,
                     tags: tags.join(","),
-                    image: null
+                    image: featuredImage?.url
                 })
                     .catch(this.catchError)
             } else {
@@ -47,7 +47,7 @@ export default class Query {
                     title,
                     onlineStoreUrl,
                     tags: tags.join(","),
-                    image: null
+                    image: featuredImage?.url
                 })
             }
         })
