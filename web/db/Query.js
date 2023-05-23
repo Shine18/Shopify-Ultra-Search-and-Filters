@@ -3,7 +3,8 @@ import knex from "./connect.js"
 export default class Query {
     table = {
         PRODUCTS: "products",
-        PRODUCT_FIELDS: "product_fields"
+        PRODUCT_FIELDS: "product_fields",
+        FIELDS_VALUES: "product_fields_values"
     }
     TAG_PREFIX = "us_"
 
@@ -77,6 +78,9 @@ export default class Query {
         const { table, store } = this
         return knex(table.PRODUCTS).where({ store }).orderBy("id", "desc")
     }
+    getProduct(id) {
+        return knex(this.table.PRODUCTS).where({ store: this.store, id }).first()
+    }
     getProductByShopifyId(shopify_id) {
         return knex(this.table.PRODUCTS).where({ store: this.store, shopify_id }).first()
     }
@@ -121,5 +125,12 @@ export default class Query {
     // delete 
     deleteProductField(id) {
         return knex(this.table.PRODUCT_FIELDS).where({ id }).del()
+    }
+
+
+    // ** Product Fields Values
+
+    getFieldsValuesByProduct(product_id) {
+        return knex(this.table.FIELDS_VALUES).where({ product_id })
     }
 }

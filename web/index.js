@@ -17,6 +17,7 @@ import ProductFieldsGet from "./api/product_fields/get.js";
 import ProductFieldsUpdate from "./api/product_fields/update.js";
 import ProductFieldsDelete from "./api/product_fields/delete.js";
 import ProductFieldsVisibility from "./api/product_fields/visibility.js";
+import getSingleProduct from "./api/products/get.js";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -55,12 +56,12 @@ app.use((req, res, next) => {
   if( res.locals.shopify?.session.shop) {
     res.locals.UQuery = new Query(res.locals.shopify.session.shop)
   }
-  
   next()
 })
 
 app.get("/api/products/", getAllProducts)
 app.get("/api/products/fetch", fetchProducts)
+app.get("/api/products/:id", getSingleProduct)
 
 app.get("/api/product_fields/", ProductFieldsIndex)
 app.post("/api/product_fields/create", ProductFieldsCreate)
