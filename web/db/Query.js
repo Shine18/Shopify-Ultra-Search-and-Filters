@@ -30,6 +30,7 @@ export default class Query {
 
     async insertProduct({ id, handle, title, tags, onlineStoreUrl, featuredImage }) {
         await this.getProductByShopifyId(id).then(async data => {
+            console.log("tags", tags)
             if (data == undefined) {
                 await knex("products").insert({
                     id: null,
@@ -51,8 +52,34 @@ export default class Query {
                     image: featuredImage?.url
                 })
             }
+
+            this.parseTagsIntoFields(tags)
         })
     }
+
+
+    // parsing product tags into fields
+    async parseTagsIntoFields(tags) {
+        let fields = []
+        for( let tag of tags ) {
+            const tagParts = tag.split(":")
+            if( tagParts.length > 0 && tagParts[0].trim().length > 0 ) {
+                const fieldName = tagParts[0].trim()
+                if( fieldName.includes(this.TAG_PREFIX)) {
+                    const field = await this.getProductFieldByTag(fieldName.replace(this.TAG_PREFIX, ""))
+                    console.log(fieldName, field)
+                    if( field) {
+                        fields.push({
+                            fieldId: field.id,
+                            value: tagParts[1]
+                        })
+                    }
+                }
+            }
+        }
+        return fields
+    }
+
 
     async insertProductField({ title, type, tag, appearAs }) {
         const byTitleExists = await this.getProductFieldByTitle(title)
