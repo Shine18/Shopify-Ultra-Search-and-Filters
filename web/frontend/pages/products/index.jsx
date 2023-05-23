@@ -1,9 +1,9 @@
 import { useAppQuery, useAuthenticatedFetch } from "../../hooks";
-import { SettingToggle, MediaCard, Page, Text, SkeletonDisplayText, SkeletonBodyText, SkeletonThumbnail, Layout, Columns, AlphaStack, Inline, AlphaCard, Checkbox, Button, Divider } from '@shopify/polaris';
-import {ViewMinor} from '@shopify/polaris-icons'
+import { SettingToggle, MediaCard, Page, Text, SkeletonDisplayText, SkeletonBodyText, SkeletonThumbnail, Layout, Columns, AlphaStack, Inline, AlphaCard, Checkbox, Button, Divider, Modal, DataTable } from '@shopify/polaris';
+import { ViewMinor } from '@shopify/polaris-icons'
 import MainLayout from '../../components/Layout/MainLayout';
 import { useToast } from "@shopify/app-bridge-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 
 export default function Products({ }) {
@@ -11,6 +11,20 @@ export default function Products({ }) {
     const toast = useToast()
     const [isLoading, setLoading] = useState(true)
     const [products, setProducts] = useState([])
+    const [productFields, setProductFields] = useState([])
+
+    const [isModalOpen, displayModal] = useState(false)
+    const [isModalLoading, setModalLoading] = useState(false)
+    const [modalTitle, setModalTitle] = useState("")
+    const [singleProductDataRows, setSingleProductData] = useState(false)
+
+    const viewProductDetailsCallback = useCallback((id, title) => {
+        setModalLoading(true)
+        displayModal(true)
+        setModalTitle(title)
+        setupModal(id)
+    }, [isModalLoading, isModalOpen])
+
 
     async function handleFetchProducts() {
         const response = await fetch("/api/products/fetch")
@@ -21,17 +35,33 @@ export default function Products({ }) {
         }
     }
 
+    const setupModal = useCallback(async (id) => {
+        let rows = []
+        productFields.forEach((field) => {
+            rows.push([
+                field.title,
+                ""
+            ])
+        })
+        setSingleProductData(rows)
+        setModalLoading(false)
+    }, [productFields])
+
     useEffect(() => {
         fetch('/api/products/').then(data => data.json()).then(data => {
             console.log(data)
             setProducts(data.data)
             setLoading(false)
         })
+
+        fetch("/api/product_fields/").then(data => data.json()).then(data => {
+            console.log(data)
+            setProductFields(data)
+        })
     }, [])
 
     return <MainLayout>
         <Page>
-
             <AlphaStack gap="4">
                 <SettingToggle
                     action={{
@@ -52,11 +82,31 @@ export default function Products({ }) {
                         </>
                         :
                         <>
-                            {products.map(product => <ProductCard {...product} />)}
+                            {products.map(product => <ProductCard {...product} onViewDataClick={viewProductDetailsCallback} />)}
                         </>
                     }
                 </Columns>
             </AlphaStack>
+
+            <Modal
+                open={isModalOpen}
+                title={modalTitle}
+                onClose={() => { displayModal(false) }}
+                loading={isModalLoading}
+            >
+                <DataTable
+
+                    columnContentTypes={[
+                        'text',
+                        'text'
+                    ]}
+                    headings={[
+                        'Field',
+                        'Value'
+                    ]}
+                    rows={singleProductDataRows}
+                />
+            </Modal>
         </Page>
     </MainLayout>
 }
@@ -71,13 +121,13 @@ function SkeletonProductCard() {
     </AlphaCard>
 }
 
-function ProductCard({ title, image }) {
+function ProductCard({ id, title, image, onViewDataClick }) {
     return <MediaCard portrait
         title={title}
         primaryAction={{
             icon: ViewMinor,
             content: 'View Data',
-            onAction: () => { },
+            onAction: () => { onViewDataClick(id, title) },
         }}
     >
         <div style={{ height: 150, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -97,12 +147,4 @@ function ProductCard({ title, image }) {
             }
         </div>
     </MediaCard>
-    return <AlphaCard>
-
-        <Text as="h4" variant="headingMd">{title}</Text>
-        <br />
-        <Divider />
-        <br />
-        <Button onClick={() => { }}>View Data</Button>
-    </AlphaCard>
 }
